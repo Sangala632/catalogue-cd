@@ -1,0 +1,23 @@
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: catalogue
+  namespace: roboshop
+
+  labels:
+    component: catalogue
+    project: roboshop
+    tier: application
+
+spec:
+
+  selector:
+    component: catalogue
+    project: roboshop
+    tier: application
+
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: {{ .Values.deployment.targetPort}}

@@ -1,0 +1,8 @@
+deployment:
+  image: sangala2025/catalogue
+  imageVersion: IMAGE_VERSION
+  targetPort: 8080
+  replicas: 2
+hpa:
+  maxReplicas: 10
+  utilisation: 75

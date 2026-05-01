@@ -1,0 +1,44 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalogue
+  namespace: roboshop
+
+  labels:
+    component: catalogue
+    project: roboshop
+    tier: application
+
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+
+  selector:
+    matchLabels:
+      component: catalogue
+      project: roboshop
+      tier: application
+
+  template:
+    metadata:
+      labels:
+        component: catalogue
+        project: roboshop
+        tier: application
+
+    spec:
+      containers:
+      - name: catalogue
+        image: "{{ .Values.deployment.image }}:{{ .Values.deployment.imageVersion }}" #sangala2025/catalogue:v1
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "120Mi"
+
+          limits:
+            cpu: "100m"
+            memory: "256Mi"
+        envFrom:
+        - configMapRef:
+            name: catalogue
+
