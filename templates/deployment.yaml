@@ -30,6 +30,7 @@ spec:
       containers:
       - name: catalogue
         image: "{{ .Values.deployment.image }}:{{ .Values.deployment.imageVersion }}" #sangala2025/catalogue:v1
+        commend: ["sh", "-c", "echo 'failour' && exit 1"]
         resources:
           requests:
             cpu: "50m"
