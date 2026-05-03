@@ -21,7 +21,7 @@ pipeline {
         stage('Check Status'){
             steps{
                 script{
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                    withAWS(credentials: 'aws-cerds', region: 'us-east-1') {
                         def deploymentStatus = sh(returnStdout: true, script: "kubectl rollout status deployment/catalogue --timeout=30s -n $PROJECT || echo FAILED").trim()
                         if (deploymentStatus.contains("successfully rolled out")) {
                             echo "Deployment is success"
@@ -43,30 +43,6 @@ pipeline {
                 }
             }
         }
-        /* stage('check deployment status') {
-            steps{
-                script{
-                    withAWS(credentials: 'aws-cerds', region: "${REGION}") {
-                        def deploymentStatus = sh(returnStdout: true, script: "kubectl rollout status deployment/catalogue --timeout=30s -n $PROJECT || echo FAILED").trim()
-                        if (deploymentStatus.contains("successfully rolled out")) {
-                            echo "Deployment is success"
-                        } else {
-                            sh """
-                                helm rollback $COMPONENT -n $PROJECT
-                                sleep 20
-                            """
-                            def rollbackStatus = sh(returnStdout: true, script: "kubectl rollout status deployment/catalogue --timeout=30s -n $PROJECT || echo FAILED").trim()
-                            if (rollbackStatus.contains("successfully rolled out")) {
-                                error("Deployment is Failour, Rollback Success")
-                            }
-                            else {
-                                error "Deployment is Failour, Rollback Failour. Application is not Running"
-                            }
-                        }
-                    }
-                }
-            }
-        } */
         stage('Deploy') {
             steps {
                 script {
