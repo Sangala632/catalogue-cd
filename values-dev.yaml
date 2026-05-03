@@ -1,5 +1,5 @@
 deployment:
-  image: sangala2025/catalogue
+  image: 838180513114.dkr.ecr.us-east-1.amazonaws.com/roboshop/catalogue
   imageVersion: IMAGE_VERSION
   targetPort: 8080
   replicas: 2

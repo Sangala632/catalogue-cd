@@ -34,6 +34,14 @@ pipeline {
             }
         }
 
+        stage('check deployment status') {
+            steps{
+                scr ipt{
+                    
+                }
+            }
+        }
+
     }
 
     post { 
