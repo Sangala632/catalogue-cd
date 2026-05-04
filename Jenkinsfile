@@ -3,7 +3,7 @@ pipeline {
         label 'agent-1'
     } 
     environment {
-        appVersion = "673736"
+        appVersion = ""
         REGION = "us-east-1"
         ACC_ID = "838180513114"
         PROJECT = "roboshop"
@@ -18,6 +18,22 @@ pipeline {
         choice(name: 'deploy_to', choices: ['dev', 'qa', 'prod'], description: 'Pick the Environment')
     }
     stages {
+        stage('Deploy') {
+            steps {
+                script {
+                    withAWS(credentials: 'aws-cerds', region: "${REGION}") {
+                        sh """
+                            aws eks update-kubeconfig --region $REGION --name "$PROJECT-${params.deploy_to}"
+                            kubectl get nodes
+                            kubectl apply -f NameSpace.yaml
+                            sed -i "s/IMAGE_VERSION/${params.appVersion}/g" values-${params.deploy_to}.yaml
+                            helm upgrade --install $COMPONENT -f values-${params.deploy_to}.yaml -n $PROJECT .
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Check Status'){
             steps{
                 script{
@@ -26,6 +42,13 @@ pipeline {
                         if (deploymentStatus.contains("successfully rolled out")) {
                             echo "Deployment is success"
                         } else {
+                            def historyCount = sh(
+                                returnStdout: true,
+                                script: "helm history $COMPONENT -n $PROJECT --max 2 2>/dev/null | tail -n +2 | wc -l || echo 0").trim().toInteger()
+
+                            if (historyCount < 2) {
+                                error "Deployment failed. No previous revision to roll back to."
+                            }
                             sh """
                                 helm rollback $COMPONENT -n $PROJECT
                                 sleep 20
@@ -39,21 +62,6 @@ pipeline {
                             }
                         }
 
-                    }
-                }
-            }
-        }
-        stage('Deploy') {
-            steps {
-                script {
-                    withAWS(credentials: 'aws-cerds', region: "${REGION}") {
-                        sh """
-                            aws eks update-kubeconfig --region $REGION --name "$PROJECT-${params.deploy_to}"
-                            kubectl get nodes
-                            kubectl apply -f NameSpace.yaml
-                            sed -i "s/IMAGE_VERSION/${params.appVersion}/g" values-${params.deploy_to}.yaml
-                            helm upgrade --install $COMPONENT -f values-${params.deploy_to}.yaml -n $PROJECT .
-                        """
                     }
                 }
             }
