@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: catalogue
+  namespace: argocd # Must be the namespace where Argo CD is installed
+spec:
+  project: roboshop   # AppProject to which the application belongs
+  source:
+    repoURL: https://github.com/Sangala632/catalogue-cd.git
+    targetRevision: main
+    path: .
+    helm:
+      releaseName: catalogue
+      valueFiles:
+      - values-dev.yaml
+  destination:
+    server: https://kubernetes.default.svc # Internal cluster address
+    namespace: argocd            # Target namespace for the app
+  syncPolicy:
+    automated: # Automatically syncs when Git changes
+      prune: true
+      selfHeal: true
